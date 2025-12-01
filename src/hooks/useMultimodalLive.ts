@@ -166,9 +166,16 @@ export const useMultimodalLive = (config: AgentConfig) => {
 
         // 2. Get Microphone Stream
         console.log('[Connect] Requesting microphone access...');
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Use more robust audio constraints
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        });
         streamRef.current = stream;
-        console.log('[Connect] Microphone access granted');
+        console.log('[Connect] Microphone access granted', stream.getAudioTracks());
 
         // 3. Initialize Gemini Client
         console.log('[Connect] Initializing Gemini client...');
