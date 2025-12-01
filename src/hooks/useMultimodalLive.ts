@@ -201,8 +201,13 @@ export const useMultimodalLive = (config: AgentConfig) => {
           callbacks: {
             onopen: () => {
               console.log('[Connect] ✅ Gemini Live Session Opened Successfully!');
+              console.log('[Connect] Session opened at:', new Date().toISOString());
+              console.log('[Connect] Audio context state:', audioContextRef.current?.state);
+              console.log('[Connect] Input context state:', inputContextRef.current?.state);
+              console.log('[Connect] Stream active:', streamRef.current?.active);
               setIsConnected(true);
               setIsConnecting(false);
+              setError(null);
               
               if (audioContextRef.current?.state === 'suspended') {
                   audioContextRef.current.resume();
@@ -332,10 +337,14 @@ export const useMultimodalLive = (config: AgentConfig) => {
                  nextStartTimeRef.current = 0;
               }
             },
-            onclose: () => {
+            onclose: (event: any) => {
               console.log('[Connect] ⚠️ Session Closed');
+              console.log('[Connect] Close event details:', event);
+              console.log('[Connect] Was connected:', isConnected);
+              console.log('[Connect] Time since page load:', performance.now() / 1000, 'seconds');
               setIsConnected(false);
               setIsConnecting(false);
+              setError('Connection closed unexpectedly. Please try again.');
             },
             onerror: (err: any) => {
               console.error('[Connect] ❌ Session Error:', err);
