@@ -150,22 +150,28 @@ export const useMultimodalLive = (config: AgentConfig) => {
       cleanup();
       
       try {
+        console.log('[Connect] Starting connection attempt', attempt + 1);
         setIsConnecting(true);
         setError(null);
 
         // 1. Setup Audio Contexts
+        console.log('[Connect] Setting up audio contexts...');
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
         audioContextRef.current = new AudioContextClass({ sampleRate: OUTPUT_SAMPLE_RATE });
         inputContextRef.current = new AudioContextClass({ sampleRate: INPUT_SAMPLE_RATE });
 
         await audioContextRef.current.resume();
         await inputContextRef.current.resume();
+        console.log('[Connect] Audio contexts ready');
 
         // 2. Get Microphone Stream
+        console.log('[Connect] Requesting microphone access...');
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         streamRef.current = stream;
+        console.log('[Connect] Microphone access granted');
 
         // 3. Initialize Gemini Client
+        console.log('[Connect] Initializing Gemini client...');
         const ai = new GoogleGenAI({ apiKey });
         
         // Define tool declarations safely
@@ -173,6 +179,7 @@ export const useMultimodalLive = (config: AgentConfig) => {
         console.debug("[LiveConfig] tools:", tools);
 
         // 4. Connect to Live API
+        console.log('[Connect] Connecting to Gemini Live API...');
         const sessionPromise = ai.live.connect({
           model: MODEL_NAME,
           config: {
@@ -186,7 +193,7 @@ export const useMultimodalLive = (config: AgentConfig) => {
           },
           callbacks: {
             onopen: () => {
-              console.log('Gemini Live Session Opened');
+              console.log('[Connect] ✅ Gemini Live Session Opened Successfully!');
               setIsConnected(true);
               setIsConnecting(false);
               
@@ -319,12 +326,13 @@ export const useMultimodalLive = (config: AgentConfig) => {
               }
             },
             onclose: () => {
-              console.log('Session Closed');
+              console.log('[Connect] ⚠️ Session Closed');
               setIsConnected(false);
               setIsConnecting(false);
             },
             onerror: (err: any) => {
-              console.error('Session Error:', err);
+              console.error('[Connect] ❌ Session Error:', err);
+              console.error('[Connect] Error details:', { message: err.message, code: err.code, status: err.status });
               
               const msg = err.message || String(err);
               const code = err.code || err.status || err.statusCode;
@@ -353,7 +361,8 @@ export const useMultimodalLive = (config: AgentConfig) => {
         sessionPromiseRef.current = sessionPromise;
 
       } catch (err: any) {
-        console.error("Connection Setup Error:", err);
+        console.error('[Connect] ❌ Connection Setup Error:', err);
+        console.error('[Connect] Error details:', { message: err.message, name: err.name, stack: err.stack });
         const msg = err.message || "Failed to connect";
         
         if (attempt < MAX_RETRIES) {
