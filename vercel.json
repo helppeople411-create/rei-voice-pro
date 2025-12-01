@@ -7,16 +7,5 @@
   "env": {
     "VITE_GEMINI_API_KEY": "@vite_gemini_api_key"
   },
-  "regions": ["iad1"],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com; frame-src 'self'; frame-ancestors 'self'; base-uri 'self';"
-        }
-      ]
-    }
-  ]
+  "regions": ["iad1"]
 }
