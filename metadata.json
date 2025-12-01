@@ -1,0 +1,7 @@
+{
+  "name": "REI Voice Pro",
+  "description": "A real estate negotiation and problem-solving voice agent for investors. Specializes in handling objections, uncovering motivation, and structuring creative offers while collecting lead information.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
