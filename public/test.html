@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gemini Live Test</title>
+</head>
+<body>
+    <h1>Gemini Live Connection Test</h1>
+    <button id="testBtn">Test Connection</button>
+    <div id="log" style="margin-top: 20px; font-family: monospace; white-space: pre-wrap;"></div>
+
+    <script type="module">
+        import { GoogleGenAI } from 'https://esm.run/@google/genai';
+
+        const log = (msg) => {
+            const logDiv = document.getElementById('log');
+            logDiv.textContent += `[${new Date().toISOString()}] ${msg}\n`;
+            console.log(msg);
+        };
+
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            try {
+                log('Starting test...');
+                
+                // Get API key from environment
+                const apiKey = 'AIzaSyDG9b5DRsVT2YO-izZSMdmxxPZH83ZExkw';
+                log(`API Key: ${apiKey.substring(0, 10)}...`);
+
+                // Get microphone
+                log('Requesting microphone...');
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                log(`Microphone granted. Tracks: ${stream.getAudioTracks().length}`);
+
+                // Initialize Gemini
+                log('Initializing Gemini...');
+                const ai = new GoogleGenAI({ apiKey });
+
+                // Connect
+                log('Connecting to Gemini Live...');
+                const session = await ai.live.connect({
+                    model: 'gemini-2.0-flash-exp',
+                    config: {
+                        responseModalities: ['AUDIO'],
+                    },
+                    callbacks: {
+                        onopen: () => {
+                            log('✅ CONNECTION OPENED!');
+                        },
+                        onclose: (event) => {
+                            log(`⚠️ CONNECTION CLOSED: ${JSON.stringify(event)}`);
+                        },
+                        onerror: (err) => {
+                            log(`❌ ERROR: ${err.message || err}`);
+                        },
+                        onmessage: (msg) => {
+                            log(`📨 Message: ${JSON.stringify(msg).substring(0, 100)}`);
+                        }
+                    }
+                });
+
+                log('Session promise created, waiting for connection...');
+
+            } catch (err) {
+                log(`❌ EXCEPTION: ${err.message || err}`);
+                log(`Stack: ${err.stack}`);
+            }
+        });
+    </script>
+</body>
+</html>
